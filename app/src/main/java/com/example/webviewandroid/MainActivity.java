@@ -58,35 +58,40 @@ public class MainActivity extends AppCompatActivity {
                     MY_PERMISSIONS_READ_EXTERNAL_STORAGE);
         }
 
-        getPathFromDevice();
-
-    }
-
-
-    private void getPathFromDevice() {
         try {
+            String web=null;
             path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
             File myFile = new File(path, "nuclear_project_short3/index.html");
             if (myFile.exists()) {
-                String web = myFile.toString();
-                //Toast.makeText(this, web, Toast.LENGTH_LONG).show();
+                web = myFile.getAbsolutePath();
                 lodeweb(web);
             } else {
-                Toast.makeText(this, "File not found", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "File not found: "+myFile.getAbsolutePath(), Toast.LENGTH_LONG).show();
             }
         } catch (Exception e) {
             Toast.makeText(this, "Excperion: " + e, Toast.LENGTH_LONG).show();
         }
+
     }
 
 
     @SuppressLint("SetJavaScriptEnabled")
     private void lodeweb(String path) {
         try {
-            //Toast.makeText(this, "In web view", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "In web view", Toast.LENGTH_LONG).show();
             WebSettings webSettings = webView.getSettings();
             webSettings.setJavaScriptEnabled(true);
+            webSettings.setAllowContentAccess(true);
+            webSettings.setAppCacheEnabled(true);
+            webSettings.setDomStorageEnabled(true);
+            webSettings.setUseWideViewPort(true);
+            webView.getSettings().setDomStorageEnabled(true);
+            webView.getSettings().setLoadWithOverviewMode(true);
+            webView.getSettings().setUseWideViewPort(true);
+            webView.getSettings().setBuiltInZoomControls(true);
+            webView.getSettings().setPluginState(WebSettings.PluginState.ON);
             webView.loadUrl("file://" + path);
+            Toast.makeText(this, "path: "+path, Toast.LENGTH_LONG).show();
             webView.setWebChromeClient(new WebChromeClient());
         } catch (Exception e) {
             Toast.makeText(this, "Excperion: " + e, Toast.LENGTH_LONG).show();
