@@ -4,6 +4,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -14,9 +15,11 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.view.ViewTreeObserver;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.Toast;
 
 import java.io.BufferedReader;
@@ -32,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
     private final int MY_PERMISSIONS_READ_EXTERNAL_STORAGE = 1;
     private WebView webView;
     private File path;
+    private SwipeRefreshLayout mySwipeRefreshLayout;
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -40,6 +44,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         webView = (WebView) findViewById(R.id.web_view);
+        mySwipeRefreshLayout = (SwipeRefreshLayout) this.findViewById(R.id.swipeContainer);
+        ViewTreeObserver.OnScrollChangedListener mOnScrollChangedListener = null;
 
 
         //When permission is not granted by user, show them message why this permission is needed.
@@ -59,24 +65,40 @@ public class MainActivity extends AppCompatActivity {
         }
 
         try {
-            String web=null;
+            String web = null;
             path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
             File myFile = new File(path, "nuclear_project_short3/index.html");
             if (myFile.exists()) {
                 web = myFile.getAbsolutePath();
-                lodeweb(web);
+                lodeWeb(web);
             } else {
-                Toast.makeText(this, "File not found: "+myFile.getAbsolutePath(), Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "File not found: " + myFile.getAbsolutePath(), Toast.LENGTH_LONG).show();
             }
         } catch (Exception e) {
             Toast.makeText(this, "Excperion: " + e, Toast.LENGTH_LONG).show();
         }
 
+
+        mySwipeRefreshLayout.setOnRefreshListener(
+                new SwipeRefreshLayout.OnRefreshListener() {
+                    @Override
+                    public void onRefresh() {
+                        webView.reload();
+                        mySwipeRefreshLayout.setRefreshing(false);
+                    }
+                }
+        );
+
+
+
+
     }
 
 
+
+
     @SuppressLint("SetJavaScriptEnabled")
-    private void lodeweb(String path) {
+    private void lodeWeb(String path) {
         try {
             Toast.makeText(this, "In web view", Toast.LENGTH_LONG).show();
             WebSettings webSettings = webView.getSettings();
@@ -90,11 +112,15 @@ public class MainActivity extends AppCompatActivity {
             webView.getSettings().setUseWideViewPort(true);
             webView.getSettings().setBuiltInZoomControls(true);
             webView.getSettings().setPluginState(WebSettings.PluginState.ON);
+            webView.setWebViewClient(new WebViewClient());
+            webView.getSettings().setBuiltInZoomControls(true);
             webView.loadUrl("file://" + path);
-            Toast.makeText(this, "path: "+path, Toast.LENGTH_LONG).show();
+            //webView.loadUrl("https://www.google.com");
+            Toast.makeText(this, "path: " + path, Toast.LENGTH_LONG).show();
             webView.setWebChromeClient(new WebChromeClient());
         } catch (Exception e) {
             Toast.makeText(this, "Excperion: " + e, Toast.LENGTH_LONG).show();
         }
+
     }
 }
